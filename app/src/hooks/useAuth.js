@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { faker } from "@faker-js/faker";
 import {
   signInWithEmailAndPassword,
   signInAnonymously,
@@ -6,7 +7,7 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
 import { auth, firestore } from "../configs/firebase.config";
 
@@ -14,17 +15,34 @@ const useAuth = () => {
   const [user, setUser] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  const updateProfile = (id, username, avatar) => {
-    const docRef = doc(firestore, "users", id);
-
-    updateDoc(docRef, {
-      username,
+  const updateAvatarProfile = async (id, avatar) => {
+    console.log({ id, avatar });
+    await updateDoc(doc(firestore, "users", id), {
       avatar,
     });
+
+    setUser({ ...user, avatar });
+  };
+
+  const updateUsernameProfile = async (id, username) => {
+    await updateDoc(doc(firestore, "users", id), {
+      username,
+    });
+
+    setUser({ ...user, username });
   };
 
   const signUp = async (email, password) => {
-    await createUserWithEmailAndPassword(auth, email, password);
+    const userCreated = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+    await setDoc(doc(firestore, "users", userCreated.user.uid), {
+      username: faker.person.fullName(),
+      avatar: faker.image.avatar(),
+    });
   };
 
   const signIn = async (email, password) => {
@@ -32,7 +50,12 @@ const useAuth = () => {
   };
 
   const signInAnonymous = async () => {
-    await signInAnonymously(auth);
+    const userCreated = await signInAnonymously(auth);
+
+    await setDoc(doc(firestore, "users", userCreated.user.uid), {
+      username: faker.person.fullName(),
+      avatar: faker.image.avatar(),
+    });
   };
 
   const logOut = async () => {
@@ -47,11 +70,10 @@ const useAuth = () => {
         const newUser = { ...userDoc.data(), id: firebaseUser.uid };
 
         setUser(newUser);
-      } else {
-        setUser(null);
-      }
+      } else setUser(null);
       setIsInitialized(true);
     });
+
     return () => unsubscribe && unsubscribe();
   }, []);
 
@@ -62,7 +84,8 @@ const useAuth = () => {
     logOut,
     user,
     isInitialized,
-    updateProfile,
+    updateAvatarProfile,
+    updateUsernameProfile,
   };
 };
 

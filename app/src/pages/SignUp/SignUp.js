@@ -1,9 +1,16 @@
 import { useState } from "react";
 import { Box, Button, TextField, styled } from "@mui/material";
+import { ArrowLeft as ArrowLeftIcon } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
+import { useNavigate } from "react-router-dom";
 
-import LayoutAuth from "../../components/LayoutAuth";
+import Layout from "../../components/Layout";
 import useAppContext from "../../hooks/useAppContext";
+
+const StyledButton = styled(Button)({
+  background: "linear-gradient(90deg, #FFE259 15.1%, #FFA751 85.42%)",
+  borderRadius: "10px",
+});
 
 const StyledTextField = styled(TextField)({
   background: "rgba(31, 31, 31, 0.6)",
@@ -21,6 +28,7 @@ const StyledTextField = styled(TextField)({
 });
 
 const SignUp = () => {
+  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const {
     loadingState: { setIsLoading },
@@ -40,8 +48,30 @@ const SignUp = () => {
     setIsLoading(false);
   };
 
+  const handleBack = async () => {
+    setIsLoading(true);
+    try {
+      navigate(`/`);
+    } catch (err) {
+      enqueueSnackbar(err.message, { variant: "error" });
+    }
+    setIsLoading(false);
+  };
+
   return (
-    <LayoutAuth>
+    <Layout>
+      <StyledButton
+        sx={{
+          padding: 0,
+          position: "fixed",
+          top: "3vh",
+          left: "3vw",
+          color: "#111",
+        }}
+        onClick={handleBack}
+      >
+        <ArrowLeftIcon color="#111" fontSize="large" />
+      </StyledButton>
       <Box display="flex" flexDirection="column" gap={2}>
         <StyledTextField
           size="medium"
@@ -50,7 +80,7 @@ const SignUp = () => {
           InputLabelProps={{
             style: {
               color: "#FF9900",
-              fontWeight: 700,
+              fontWeight: 1000,
             },
           }}
           onChange={(e) => setEmail(e.target.value)}
@@ -63,7 +93,7 @@ const SignUp = () => {
           InputLabelProps={{
             style: {
               color: "#FF9900",
-              fontWeight: 700,
+              fontWeight: 1000,
             },
           }}
           onChange={(e) => setPassword(e.target.value)}
@@ -85,7 +115,7 @@ const SignUp = () => {
           Sign Up
         </Button>
       </Box>
-    </LayoutAuth>
+    </Layout>
   );
 };
 

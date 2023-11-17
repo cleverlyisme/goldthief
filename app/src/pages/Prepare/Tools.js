@@ -1,5 +1,7 @@
+import LayoutGame from "../../components/LayoutGame";
+
 const Tools = () => {
-  return <div>Tools</div>;
+  return <LayoutGame>Tools</LayoutGame>;
 };
 
 export default Tools;

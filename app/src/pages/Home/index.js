@@ -1,7 +1,8 @@
 import { Box, Button, Typography, styled } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useSnackbar } from "notistack";
 
-import LayoutAuth from "../../components/LayoutAuth";
+import Layout from "../../components/Layout";
 import useAppContext from "../../hooks/useAppContext";
 
 const StyledButton = styled(Button)({
@@ -18,6 +19,7 @@ const StyledTypo = styled(Typography)({
 
 const Home = () => {
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
   const {
     authState: { signInAnonymous },
     loadingState: { setIsLoading },
@@ -28,7 +30,7 @@ const Home = () => {
     try {
       navigate("/signin");
     } catch (err) {
-      console.log(err.message);
+      enqueueSnackbar(err.message, { variant: "error" });
     }
     setIsLoading(false);
   };
@@ -38,7 +40,7 @@ const Home = () => {
     try {
       navigate("/signup");
     } catch (err) {
-      console.log(err.message);
+      enqueueSnackbar(err.message, { variant: "error" });
     }
     setIsLoading(false);
   };
@@ -48,7 +50,7 @@ const Home = () => {
     try {
       await signInAnonymous();
     } catch (err) {
-      console.log(err.message);
+      enqueueSnackbar(err.message, { variant: "error" });
     }
     setIsLoading(false);
   };
@@ -58,13 +60,13 @@ const Home = () => {
     try {
       navigate("/guide");
     } catch (err) {
-      console.log(err.message);
+      enqueueSnackbar(err.message, { variant: "error" });
     }
     setIsLoading(false);
   };
 
   return (
-    <LayoutAuth>
+    <Layout>
       <Box display="flex" flexDirection="column" gap={2}>
         <StyledButton onClick={handlesignIn}>
           <StyledTypo fontSize={{ xs: 15, md: 18 }}>Sign in</StyledTypo>
@@ -79,10 +81,10 @@ const Home = () => {
         </StyledButton>
 
         <StyledButton onClick={handleGuide}>
-          <StyledTypo fontSize={{ xs: 15, md: 18 }}>Guid</StyledTypo>
+          <StyledTypo fontSize={{ xs: 15, md: 18 }}>Guide</StyledTypo>
         </StyledButton>
       </Box>
-    </LayoutAuth>
+    </Layout>
   );
 };
 
