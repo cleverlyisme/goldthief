@@ -60,17 +60,50 @@ export const join = async (user, code, password) => {
   if (gameData.password !== password.toLowerCase())
     throw new Error("Invalid room password");
 
-  await updateDoc(doc(firestore, "games", gameDoc.id), {
+  await updateDoc(doc(firestore, "games", activeGameId), {
     joiner: { id, username, missingTurnCount: 0 },
     status: "preparing",
   });
 
-  const gameSnap = await getDoc(doc(firestore, "games", gameDoc.id));
-  const game = { id: gameDoc.id, ...gameSnap.data() };
+  const gameSnap = await getDoc(doc(firestore, "games", activeGameId));
+  const game = { id: activeGameId, ...gameSnap.data() };
 
   await updateDoc(doc(firestore, "users", id), {
-    activeGameId: gameDoc.id,
+    activeGameId,
   });
 
   return game;
+};
+
+export const play = async (user, game, coordinate) => {
+  const { id, activeGameId } = user;
+  const { host, joiner } = game;
+  const steps = game.steps || [];
+
+  if (steps.find((step) => step.coordinates.includes(coordinate)))
+    throw new Error("You already check this coordinate");
+
+  await updateDoc(doc(firestore, "games", activeGameId), {
+    steps: [...steps, { userId: id, coordinates: [coordinate] }],
+    turn: host.id === id ? joiner.id : host.id,
+  });
+
+  const gameSnap = await getDoc(doc(firestore, "games", activeGameId));
+  const gameData = { id: activeGameId, ...gameSnap.data() };
+
+  return gameData;
+};
+
+export const setCurrentPlayerWin = async (user, game) => {
+  const { id, activeGameId, win } = user;
+
+  await updateDoc(doc(firestore, "games", activeGameId), {
+    status: "done",
+    winner: id,
+  });
+
+  await updateDoc(doc(firestore, "users", id), {
+    activeGameId: null,
+    win: win + 1,
+  });
 };

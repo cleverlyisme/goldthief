@@ -22,6 +22,7 @@ const LayoutGame = ({ children }) => {
 
   return (
     <Box
+      position="relative"
       minWidth="100vw"
       minHeight="100vh"
       display="flex"
@@ -29,6 +30,7 @@ const LayoutGame = ({ children }) => {
       justifyContent="center"
       alignItems="center"
       sx={{
+        py: 3,
         background: `url("/assets/images/background.png"), lightgray 50%`,
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
@@ -38,9 +40,9 @@ const LayoutGame = ({ children }) => {
       {user && (
         <Button
           sx={{
-            position: "fixed",
+            position: "absolute",
             top: "3vh",
-            right: "3vw",
+            right: "5vw",
             background: "linear-gradient(90deg, #FFE259 15.1%, #FFA751 85.42%)",
             padding: "10px 20px",
             borderRadius: "10px",
@@ -59,7 +61,12 @@ const LayoutGame = ({ children }) => {
           </Typography>
         </Button>
       )}
-      <Box mb={3}>
+      <Box
+        display="flex"
+        flexDirection={{ xs: "column", sm: "row" }}
+        gap="20px"
+        mb={3}
+      >
         <Typography
           fontFamily="'Luckiest Guy', cursive"
           fontWeight="600"
@@ -72,7 +79,21 @@ const LayoutGame = ({ children }) => {
             lineHeight: "1",
           }}
         >
-          Gold Thief
+          Gold
+        </Typography>
+        <Typography
+          fontFamily="'Luckiest Guy', cursive"
+          fontWeight="600"
+          fontSize={{ xs: 50, md: 60 }}
+          align="center"
+          sx={{
+            WebkitTextStroke: "0.1px #D68F24",
+            textShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
+            color: "rgba(255, 226, 89)",
+            lineHeight: "1",
+          }}
+        >
+          Thief
         </Typography>
       </Box>
       {children}

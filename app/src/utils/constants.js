@@ -17,3 +17,24 @@ export const defaultCoordinates = Array.from(
   typeOfTreasure: null,
   isSelected: false,
 }));
+
+export const notis = [
+  {
+    variant: "win",
+    title: "Congratilations",
+    text: "You won!",
+    img: "/assets/images/win.png",
+  },
+  {
+    variant: "lose",
+    title: "Congratilations",
+    text: "You lose the game!",
+    img: "/assets/images/lose.png",
+  },
+  {
+    variant: "draw",
+    title: "Draw",
+    text: "We can't find the winner...",
+    img: "/assets/images/draw.png",
+  },
+];

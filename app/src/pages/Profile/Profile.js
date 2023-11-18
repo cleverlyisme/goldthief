@@ -69,7 +69,6 @@ const Profile = () => {
     setIsLoading(true);
     try {
       const url = await handleUpload();
-      console.log({ url });
       await updateAvatarProfile(user.id, url);
 
       setChangingAvatar(false);
@@ -94,21 +93,16 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    if (user) {
-      setUsername(user.username);
-      setUrlImage(user.avatar);
-    }
+    setUsername(user.username);
+    setUrlImage(user.avatar);
   }, [user]);
-
-  useEffect(() => {
-    console.log({ urlImage });
-  }, [urlImage]);
 
   return (
     <LayoutGame>
       <Box
         display="flex"
         flexDirection="column"
+        justifyContent="space-evenly"
         alignItems="center"
         gap="30px"
         width={{ xs: "90vw", sm: "80vw", lg: "50vw" }}
@@ -233,12 +227,19 @@ const Profile = () => {
           </Box>
         </Box>
         <Box display="flex" flexDirection="column" alignItems="center">
-          <StyledStats fontSize={{ xs: 20, md: 24 }}>Stats:</StyledStats>
-          <StyledStats fontSize={{ xs: 20, md: 24 }}>
-            Games Played: {0}
+          <StyledStats fontSize={{ xs: 20, sm: 24 }}>Statistic:</StyledStats>
+          <StyledStats fontSize={{ xs: 20, sm: 24 }}>
+            Total: {user.win + user.lose + user.draw}
           </StyledStats>
-          <StyledStats fontSize={{ xs: 20, md: 24 }}>Win: {0}</StyledStats>
-          <StyledStats fontSize={{ xs: 20, md: 24 }}>Lose: {0}</StyledStats>
+          <StyledStats fontSize={{ xs: 20, sm: 24 }}>
+            Win: {user.win}
+          </StyledStats>
+          <StyledStats fontSize={{ xs: 20, sm: 24 }}>
+            Lose: {user.lose}
+          </StyledStats>
+          <StyledStats fontSize={{ xs: 20, sm: 24 }}>
+            Draw: {user.draw}
+          </StyledStats>
         </Box>
       </Box>
     </LayoutGame>

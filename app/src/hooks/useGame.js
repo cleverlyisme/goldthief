@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
 
-import { create, join } from "../services/game.service";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { firestore } from "../configs/firebase.config";
+import {
+  create,
+  join,
+  play,
+  setCurrentPlayerWin,
+} from "../services/game.service";
 import useAuth from "./useAuth";
+import useNoti from "./useNoti";
 
 const useGame = () => {
   const { user } = useAuth();
+  const { setNoti } = useNoti();
 
   const [game, setGame] = useState(null);
   const [isInitializedGame, setIsInitializedGame] = useState(false);
@@ -25,6 +32,16 @@ const useGame = () => {
     setGame(gameJoined);
 
     return gameJoined;
+  };
+
+  const chooseCoordinate = async (user, game, coordinate) => {
+    const gameData = await play(user, game, coordinate);
+
+    setGame(gameData);
+  };
+
+  const setCurrentWin = async (user, game) => {
+    await setCurrentPlayerWin(user, game);
   };
 
   useEffect(() => {
@@ -53,7 +70,12 @@ const useGame = () => {
         try {
           const gameData = doc.data();
 
-          setGame({ id: game.id, ...gameData });
+          if (gameData.status === "done") {
+            if (user.id === gameData.winner) setNoti({ variant: "win" });
+            else setNoti({ variant: "lose" });
+
+            setGame(null);
+          } else setGame({ id: game.id, ...gameData });
         } catch (err) {
           throw new Error(err);
         }
@@ -70,6 +92,8 @@ const useGame = () => {
     setIsInitializedGame,
     createGame,
     joinGame,
+    chooseCoordinate,
+    setCurrentWin,
   };
 };
 

@@ -22,6 +22,7 @@ const Layout = ({ children }) => {
 
   return (
     <Box
+      position="relative"
       minWidth="100vw"
       minHeight="100vh"
       display="flex"
@@ -38,9 +39,9 @@ const Layout = ({ children }) => {
       {user && (
         <Button
           sx={{
-            position: "fixed",
+            position: "absolute",
             top: "3vh",
-            right: "3vw",
+            right: "5vw",
             background: "linear-gradient(90deg, #FFE259 15.1%, #FFA751 85.42%)",
             padding: "10px 20px",
             borderRadius: "10px",

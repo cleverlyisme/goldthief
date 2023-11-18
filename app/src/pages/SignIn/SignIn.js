@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Button, TextField, styled } from "@mui/material";
+import { Box, Button, TextField, Typography, styled } from "@mui/material";
 import { ArrowLeft as ArrowLeftIcon } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +10,12 @@ import useAppContext from "../../hooks/useAppContext";
 const StyledButton = styled(Button)({
   background: "linear-gradient(90deg, #FFE259 15.1%, #FFA751 85.42%)",
   borderRadius: "10px",
+});
+
+const StyledTypo = styled(Typography)({
+  color: "#2E2E2E",
+  fontFamily: "Luckiest Guy",
+  fontWeight: "500",
 });
 
 const StyledTextField = styled(TextField)({
@@ -101,17 +107,12 @@ const SignIn = () => {
         <Button
           sx={{
             background: "linear-gradient(90deg, #FFE259 15.1%, #FFA751 85.42%)",
-            py: 1,
-            px: 5,
-            color: "#2E2E2E",
-            fontFamily: "Luckiest Guy",
-            fontSize: 20,
-            fontWeight: "600",
+            padding: "10px 100px",
             borderRadius: "15px",
           }}
           onClick={handleSignIn}
         >
-          Sign In
+          <StyledTypo fontSize={{ xs: 16, md: 18 }}>Sign In</StyledTypo>
         </Button>
       </Box>
     </Layout>

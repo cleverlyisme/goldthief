@@ -99,23 +99,31 @@ const Treasures = () => {
   const handleNextButton = async () => {
     setIsLoading(true);
     try {
-      if (treasures.find((treasure) => treasure.quantity > 0))
+      if (treasures?.find((treasure) => treasure.quantity > 0))
         throw new Error("You must place all the treasures");
 
-      const coorsfirstTreasure = coors
-        .filter((coor) => coor.typeOfTreasure === 1)
+      const coorsFirstTreasure = coors
+        ?.filter((coor) => coor.typeOfTreasure === 1)
         .map((coor) => coor.coordinate);
-      const coorsseondTreasure = coors
-        .filter((coor) => coor.typeOfTreasure === 2)
+      const coorsSeondTreasure = coors
+        ?.filter((coor) => coor.typeOfTreasure === 2)
         .map((coor) => coor.coordinate);
-      const coorsthirdTreasure = coors
-        .filter((coor) => coor.typeOfTreasure === 3)
+      const coorsThirdTreasure = coors
+        ?.filter((coor) => coor.typeOfTreasure === 3)
         .map((coor) => coor.coordinate);
 
+      console.log({
+        user,
+        game,
+        coorsFirstTreasure,
+        coorsSeondTreasure,
+        coorsThirdTreasure,
+      });
+
       await prepareMap(user, game, {
-        1: coorsfirstTreasure,
-        2: coorsseondTreasure,
-        3: coorsthirdTreasure,
+        1: coorsFirstTreasure,
+        2: coorsSeondTreasure,
+        3: coorsThirdTreasure,
       });
     } catch (err) {
       enqueueSnackbar(err.message, { variant: "error" });

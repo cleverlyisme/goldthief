@@ -16,7 +16,6 @@ const useAuth = () => {
   const [isInitialized, setIsInitialized] = useState(false);
 
   const updateAvatarProfile = async (id, avatar) => {
-    console.log({ id, avatar });
     await updateDoc(doc(firestore, "users", id), {
       avatar,
     });
@@ -42,6 +41,9 @@ const useAuth = () => {
     await setDoc(doc(firestore, "users", userCreated.user.uid), {
       username: faker.person.fullName(),
       avatar: faker.image.avatar(),
+      win: 0,
+      lose: 0,
+      draw: 0,
     });
   };
 
@@ -55,6 +57,9 @@ const useAuth = () => {
     await setDoc(doc(firestore, "users", userCreated.user.uid), {
       username: faker.person.fullName(),
       avatar: faker.image.avatar(),
+      win: 0,
+      lose: 0,
+      draw: 0,
     });
   };
 
