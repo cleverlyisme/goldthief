@@ -15,5 +15,6 @@ jobs:
           cd app
           yarn
           yarn build
+      - run: yarn global add firebase-tools
       - run: |
           firebase deploy
