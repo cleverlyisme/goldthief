@@ -2,20 +2,22 @@ import { useEffect, useState } from "react";
 
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { firestore } from "../configs/firebase.config";
+import { cancel } from "../services/prepare.service";
 import {
   create,
   join,
   play,
-  setCurrentPlayerWin,
+  setTurn,
+  setWinner,
+  setDraw,
 } from "../services/game.service";
 import useAuth from "./useAuth";
-import useNoti from "./useNoti";
 
 const useGame = () => {
   const { user } = useAuth();
-  const { setNoti } = useNoti();
 
   const [game, setGame] = useState(null);
+  const [opponent, setOpponent] = useState(null);
   const [isInitializedGame, setIsInitializedGame] = useState(false);
 
   const createGame = async (user, password) => {
@@ -34,14 +36,40 @@ const useGame = () => {
     return gameJoined;
   };
 
+  const cancelGame = async () => {
+    await cancel(game);
+  };
+
   const chooseCoordinate = async (user, game, coordinate) => {
     const gameData = await play(user, game, coordinate);
 
     setGame(gameData);
   };
 
-  const setCurrentWin = async (user, game) => {
-    await setCurrentPlayerWin(user, game);
+  const setUserTurn = async (userId, game) => {
+    await setTurn(userId, game);
+  };
+
+  const setWinnerGame = async (winner, loser, game) => {
+    await setWinner(winner, loser, game);
+
+    setGame(null);
+  };
+
+  const setDrawGame = async (userData, opponentData, game) => {
+    await setDraw(userData, opponentData, game);
+
+    setGame(null);
+  };
+
+  const setOpponentData = async () => {
+    if (game?.host && game?.joiner) {
+      const opponentId =
+        game.host.id === user.id ? game.joiner.id : game.host.id;
+      const opponentDoc = await getDoc(doc(firestore, "users", opponentId));
+
+      setOpponent({ id: opponentId, ...opponentDoc.data() });
+    }
   };
 
   useEffect(() => {
@@ -55,7 +83,7 @@ const useGame = () => {
           const newGame = { ...gameDoc.data(), id: user.activeGameId };
 
           setGame(newGame);
-        } else setGame(null);
+        }
 
         setIsInitializedGame(true);
       };
@@ -66,20 +94,18 @@ const useGame = () => {
 
   useEffect(() => {
     if (game) {
-      const unsub = onSnapshot(doc(firestore, "games", game.id), (doc) => {
-        try {
-          const gameData = doc.data();
+      const unsub = onSnapshot(
+        doc(firestore, "games", game.id),
+        async (doc) => {
+          try {
+            const gameData = doc.data();
 
-          if (gameData.status === "done") {
-            if (user.id === gameData.winner) setNoti({ variant: "win" });
-            else setNoti({ variant: "lose" });
-
-            setGame(null);
-          } else setGame({ id: game.id, ...gameData });
-        } catch (err) {
-          throw new Error(err);
+            setGame({ id: game.id, ...gameData });
+          } catch (err) {
+            throw new Error(err);
+          }
         }
-      });
+      );
 
       return () => unsub && unsub();
     }
@@ -92,8 +118,13 @@ const useGame = () => {
     setIsInitializedGame,
     createGame,
     joinGame,
+    cancelGame,
     chooseCoordinate,
-    setCurrentWin,
+    setUserTurn,
+    setWinnerGame,
+    setDrawGame,
+    opponent,
+    setOpponentData,
   };
 };
 

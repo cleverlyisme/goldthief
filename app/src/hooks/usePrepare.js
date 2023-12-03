@@ -17,19 +17,22 @@ const usePrepare = () => {
   const prepareMap = async (user, game, map) => {
     const gameData = await prepareGameMap(user, game, map);
 
+    setTreasures(defaultTreasures);
     setGame(gameData);
 
     return gameData;
   };
 
+  const reset = () => {
+    setCoors(defaultCoordinates);
+    setOpponentCoors(defaultCoordinates);
+    setTreasures(defaultTreasures);
+    setOpponentTreasures(defaultTreasures);
+    setGame(null);
+  };
+
   useEffect(() => {
-    if (!user) {
-      setCoors(defaultCoordinates);
-      setOpponentCoors(defaultCoordinates);
-      setTreasures(defaultTreasures);
-      setOpponentTreasures(defaultTreasures);
-      setGame(null);
-    }
+    if (!user?.activeGameId) reset();
   }, [user]);
 
   return {
@@ -42,6 +45,7 @@ const usePrepare = () => {
     opponentTreasures,
     setOpponentTreasures,
     prepareMap,
+    reset,
   };
 };
 

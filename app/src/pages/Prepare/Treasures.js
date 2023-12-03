@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, Button, Grid, Typography, styled } from "@mui/material";
 import { useSnackbar } from "notistack";
 
+import { defaultPrepareMapTime } from "../../utils/constants";
 import LayoutGame from "../../components/LayoutGame";
 import useAppContext from "../../hooks/useAppContext";
 
@@ -26,11 +27,13 @@ const Treasures = () => {
     gameState: {
       game: { host, joiner },
       game,
+      cancelGame,
     },
     prepareState: { coors, setCoors, treasures, setTreasures, prepareMap },
   } = useAppContext();
 
   const [treasureChoose, setTreasureChoose] = useState(null);
+  const [time, setTime] = useState(defaultPrepareMapTime);
 
   const handleChooseTreasure = async (type) => {
     setIsLoading(true);
@@ -112,14 +115,6 @@ const Treasures = () => {
         ?.filter((coor) => coor.typeOfTreasure === 3)
         .map((coor) => coor.coordinate);
 
-      console.log({
-        user,
-        game,
-        coorsFirstTreasure,
-        coorsSeondTreasure,
-        coorsThirdTreasure,
-      });
-
       await prepareMap(user, game, {
         1: coorsFirstTreasure,
         2: coorsSeondTreasure,
@@ -130,6 +125,29 @@ const Treasures = () => {
     }
     setIsLoading(false);
   };
+
+  const setTimes = async () => {
+    setIsLoading(true);
+    try {
+      const currentTime = parseInt(Math.floor(Date.now()) / 1000);
+      const timeElapsed = parseInt(
+        currentTime - game.prepareMapTime.start?.seconds
+      );
+      const remainingTime = parseInt(
+        game.prepareMapTime?.seconds - timeElapsed
+      );
+
+      if (remainingTime < 0) await cancelGame();
+      else setTime(remainingTime >= 0 ? remainingTime : 0);
+    } catch (err) {
+      enqueueSnackbar(err.message, { variant: "error" });
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    setTimes();
+  }, [game]);
 
   return (
     <LayoutGame>
@@ -144,6 +162,11 @@ const Treasures = () => {
           <StyledTypo fontSize={{ xs: 16, md: 22 }}>{user.username}</StyledTypo>
           <StyledTypo fontSize={{ xs: 16, md: 22 }}>
             {host.id === user.id ? joiner.username : host.username}
+          </StyledTypo>
+        </Box>
+        <Box display="flex" justifyContent="center" alignItems="center">
+          <StyledTypo color="red" fontSize={{ xs: 16, md: 22 }}>
+            Time: {time}
           </StyledTypo>
         </Box>
         <Box

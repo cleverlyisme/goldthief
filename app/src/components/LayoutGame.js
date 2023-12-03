@@ -44,7 +44,7 @@ const LayoutGame = ({ children }) => {
             top: "3vh",
             right: "5vw",
             background: "linear-gradient(90deg, #FFE259 15.1%, #FFA751 85.42%)",
-            padding: "10px 20px",
+            padding: { xs: "5px 10px", sm: "10px 20px" },
             borderRadius: "10px",
           }}
           onClick={handleSignOut}

@@ -32,11 +32,7 @@ export const AppContextProvider = ({ children }) => {
     >
       {children}
       <Loading isLoading={loadingState.isLoading} />
-      <Noti
-        noti={notiState.noti}
-        setNoti={notiState.setNoti}
-        setGame={gameState.setGame}
-      />
+      <Noti noti={notiState.noti} setNoti={notiState.setNoti} />
     </AppContext.Provider>
   );
 };

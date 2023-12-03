@@ -5,18 +5,25 @@ import {
   getDoc,
   getDocs,
   query,
+  serverTimestamp,
   updateDoc,
   where,
 } from "firebase/firestore";
-import { nanoid } from "nanoid";
 
 import { firestore } from "../configs/firebase.config";
+import {
+  defaultPrepareMapTime,
+  defaultTurnTime,
+  nanoid,
+} from "../utils/constants";
 
 export const create = async (user, password) => {
-  const { id, username, activeGameId } = user;
+  const { id, username } = user;
+
+  if (user?.activeGameId) throw new Error("User already in a game");
 
   const newGame = {
-    code: nanoid(6).toLowerCase(),
+    code: nanoid(),
     password: password.trim() || "",
     status: "waiting",
     host: {
@@ -39,7 +46,9 @@ export const create = async (user, password) => {
 };
 
 export const join = async (user, code, password) => {
-  const { id, username, activeGameId } = user;
+  const { id, username } = user;
+
+  if (user?.activeGameId) throw new Error("User already in a game");
 
   if (!code.trim()) throw new Error("Invalid room code");
 
@@ -60,50 +69,116 @@ export const join = async (user, code, password) => {
   if (gameData.password !== password.toLowerCase())
     throw new Error("Invalid room password");
 
-  await updateDoc(doc(firestore, "games", activeGameId), {
+  await updateDoc(doc(firestore, "games", gameDoc.id), {
     joiner: { id, username, missingTurnCount: 0 },
     status: "preparing",
+    prepareMapTime: {
+      seconds: defaultPrepareMapTime,
+      start: serverTimestamp(),
+    },
   });
 
-  const gameSnap = await getDoc(doc(firestore, "games", activeGameId));
-  const game = { id: activeGameId, ...gameSnap.data() };
+  const gameSnap = await getDoc(doc(firestore, "games", gameDoc.id));
+  const game = { id: gameDoc.id, ...gameSnap.data() };
 
   await updateDoc(doc(firestore, "users", id), {
-    activeGameId,
+    activeGameId: gameDoc.id,
   });
 
   return game;
 };
 
 export const play = async (user, game, coordinate) => {
-  const { id, activeGameId } = user;
+  const { id } = user;
   const { host, joiner } = game;
   const steps = game.steps || [];
 
-  if (steps.find((step) => step.coordinates.includes(coordinate)))
+  if (
+    steps.find(
+      (step) => step.coordinates.includes(coordinate) && step.userId === user.id
+    )
+  )
     throw new Error("You already check this coordinate");
 
-  await updateDoc(doc(firestore, "games", activeGameId), {
+  await updateDoc(doc(firestore, "games", game.id), {
     steps: [...steps, { userId: id, coordinates: [coordinate] }],
     turn: host.id === id ? joiner.id : host.id,
+    countdownTimeTurn: {
+      seconds: defaultTurnTime,
+      start: serverTimestamp(),
+    },
   });
 
-  const gameSnap = await getDoc(doc(firestore, "games", activeGameId));
-  const gameData = { id: activeGameId, ...gameSnap.data() };
+  const gameSnap = await getDoc(doc(firestore, "games", game.id));
+  const gameData = { id: game.id, ...gameSnap.data() };
 
   return gameData;
 };
 
-export const setCurrentPlayerWin = async (user, game) => {
-  const { id, activeGameId, win } = user;
+export const setTurn = async (userId, game) => {
+  const missingHost =
+    game.host.id === userId
+      ? game.host.missingTurnCount
+      : parseInt(game.host.missingTurnCount) + 1;
+  const missingJoiner =
+    game.joiner.id === userId
+      ? game.joiner.missingTurnCount
+      : parseInt(game.joiner.missingTurnCount) + 1;
 
-  await updateDoc(doc(firestore, "games", activeGameId), {
+  const host = { ...game.host, missingTurnCount: missingHost };
+  const joiner = { ...game.joiner, missingTurnCount: missingJoiner };
+
+  await updateDoc(doc(firestore, "games", game.id), {
+    host,
+    joiner,
+    turn: userId,
+    countdownTimeTurn: {
+      seconds: defaultTurnTime,
+      start: serverTimestamp(),
+    },
+  });
+};
+
+export const setWinner = async (winner, loser, game) => {
+  const { id } = game;
+
+  await updateDoc(doc(firestore, "games", id), {
     status: "done",
-    winner: id,
+    winner: winner.id,
   });
 
-  await updateDoc(doc(firestore, "users", id), {
+  await updateDoc(doc(firestore, "users", winner.id), {
     activeGameId: null,
-    win: win + 1,
+    win: winner.win + 1,
+    lose: winner.lose,
+  });
+
+  await updateDoc(doc(firestore, "users", loser.id), {
+    activeGameId: null,
+    win: loser.win,
+    lose: loser.lose + 1,
+  });
+};
+
+export const setDraw = async (user, opponent, game) => {
+  await updateDoc(doc(firestore, "games", game.id), {
+    status: "done",
+    winner: null,
+  });
+
+  await updateDoc(doc(firestore, "users", user.id), {
+    activeGameId: null,
+    draw: user.draw + 1,
+  });
+
+  await updateDoc(doc(firestore, "users", opponent.id), {
+    activeGameId: null,
+    draw: opponent.draw + 1,
+  });
+};
+
+export const clear = async (userId) => {
+  await updateDoc(doc(firestore, "users", userId), {
+    activeGameId: null,
   });
 };

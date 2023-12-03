@@ -7,7 +7,7 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
 
 import { auth, firestore } from "../configs/firebase.config";
 
@@ -66,6 +66,25 @@ const useAuth = () => {
   const logOut = async () => {
     await signOut(auth);
   };
+
+  useEffect(() => {
+    if (user) {
+      const unsub = onSnapshot(
+        doc(firestore, "users", user.id),
+        async (doc) => {
+          try {
+            const userData = doc.data();
+
+            setUser({ id: user.id, ...userData });
+          } catch (err) {
+            throw new Error(err);
+          }
+        }
+      );
+
+      return () => unsub && unsub();
+    }
+  }, [user]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {

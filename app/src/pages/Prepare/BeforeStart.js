@@ -6,7 +6,6 @@ import useAppContext from "../../hooks/useAppContext";
 const StyledButton = styled(Button)({
   marginTop: "20px",
   background: "linear-gradient(90deg, #FFE259 15.1%, #FFA751 85.42%)",
-  padding: "10px 100px",
   borderRadius: "10px",
 });
 
@@ -82,7 +81,7 @@ const BeforeStart = () => {
           </Box>
         </Box>
       </Box>
-      <StyledButton>
+      <StyledButton sx={{ padding: { xs: "10px 50px", md: "10px 100px" } }}>
         <StyledTypo>Waiting for your opponent...</StyledTypo>
       </StyledButton>
     </LayoutGame>

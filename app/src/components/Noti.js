@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Box, Button, Typography, alpha, styled } from "@mui/material";
 
 import { notis } from "../utils/constants";
@@ -10,18 +11,19 @@ const StyledButton = styled(Button)({
 const StyledTypo = styled(Typography)({
   fontFamily: "Luckiest Guy",
   fontWeight: "500",
+  color: "#111",
+  textAlign: "center",
 });
 
-const Noti = ({ noti, setNoti, setGame }) => {
+const Noti = ({ noti, setNoti }) => {
   if (!noti) return null;
 
   const handleClose = async () => {
     try {
-      setGame(null);
+      setNoti(null);
     } catch (err) {
       throw new Error(err);
     }
-    setNoti(null);
   };
 
   const announce = notis.find((n) => n.variant === noti.variant);
@@ -46,14 +48,15 @@ const Noti = ({ noti, setNoti, setGame }) => {
         flexDirection="column"
         justifyContent="space-evenly"
         alignItems="center"
-        sx={{ background: "rgba(255, 253, 253, 0.5)", px: 3, py: 2 }}
+        borderRadius="10px"
+        sx={{ background: "rgba(255, 253, 253, 0.8)", px: 3, py: 2 }}
       >
         <Box>
           <Box component="img" src={announce.img} width={100} height={100} />
         </Box>
         <StyledTypo>{announce.title}</StyledTypo>
         <StyledTypo>{announce.text}</StyledTypo>
-        <Box display="flex" justifyContent="flex-end">
+        <Box display="flex" justifyContent="flex-end" alignSelf="flex-end">
           <StyledButton padding="10px 20px">
             <StyledTypo onClick={handleClose}>Close</StyledTypo>
           </StyledButton>

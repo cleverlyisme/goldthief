@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Box, Button, Typography, styled } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
@@ -21,6 +22,9 @@ const HomeAuthenticated = () => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const {
+    authState: { user },
+    gameState: { game, setGame },
+    notiState: { setNoti },
     loadingState: { setIsLoading },
   } = useAppContext();
 
@@ -64,6 +68,19 @@ const HomeAuthenticated = () => {
     }
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    if (game?.status === "done") {
+      setGame(null);
+      setNoti(
+        game?.winner
+          ? game.winner === user?.id
+            ? { variant: "win" }
+            : { variant: "lose" }
+          : { variant: "draw" }
+      );
+    } else setNoti(null);
+  }, []);
 
   return (
     <Layout>

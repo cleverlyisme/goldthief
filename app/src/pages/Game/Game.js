@@ -3,16 +3,14 @@ import { Box, Button, Grid, Typography, styled } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { Close as CloseIcon } from "@mui/icons-material";
 
-import { defaultTreasures } from "../../utils/constants";
+import {
+  defaultTreasures,
+  defaultCoordinates,
+  defaultTurnTime,
+  defaultGameTime,
+} from "../../utils/constants";
 import LayoutGame from "../../components/LayoutGame";
 import useAppContext from "../../hooks/useAppContext";
-
-const StyledButton = styled(Button)({
-  marginTop: "20px",
-  background: "linear-gradient(90deg, #FFE259 15.1%, #FFA751 85.42%)",
-  padding: "10px 100px",
-  borderRadius: "10px",
-});
 
 const StyledTypo = styled(Typography)({
   fontFamily: "Luckiest Guy",
@@ -28,7 +26,11 @@ const Game = () => {
       game: { host, joiner },
       game,
       chooseCoordinate,
-      setCurrentWin,
+      setWinnerGame,
+      setUserTurn,
+      setDrawGame,
+      opponent,
+      setOpponentData,
     },
     prepareState: {
       coors,
@@ -46,6 +48,117 @@ const Game = () => {
   const [userPoint, setUserPoint] = useState(0);
   const [opponentPoint, setOpponentPoint] = useState(0);
 
+  const [turnTime, setTurnTime] = useState(defaultTurnTime);
+
+  const [gameTime, setGameTime] = useState(defaultGameTime);
+
+  const loadSteps = async () => {
+    setIsLoading(true);
+    try {
+      const userMap = user?.id === host?.id ? host.map : joiner.map;
+      const opponentMap = user?.id === host?.id ? joiner.map : host.map;
+
+      if (game.steps) {
+        const updatedUserCoors = defaultCoordinates.map((coor) => {
+          for (const [treasureType, treasureCoordinates] of Object.entries(
+            userMap
+          )) {
+            if (treasureCoordinates.includes(coor.coordinate)) {
+              return {
+                ...coor,
+                typeOfTreasure: parseInt(treasureType),
+                isSelected: false,
+              };
+            }
+          }
+          return coor;
+        });
+
+        const updatedOpponentCoors = defaultCoordinates.map((coor) => {
+          let newCoor = { ...coor, isSelected: false, typeOfTreasure: null };
+
+          for (const [treasureType, treasureCoordinates] of Object.entries(
+            opponentMap
+          )) {
+            if (treasureCoordinates.includes(coor.coordinate)) {
+              newCoor = {
+                ...newCoor,
+                typeOfTreasure: parseInt(treasureType),
+              };
+            }
+          }
+
+          return newCoor;
+        });
+
+        for (const step of game.steps) {
+          const targetCoors =
+            step.userId === user?.id ? updatedOpponentCoors : updatedUserCoors;
+
+          for (const coordinate of step.coordinates) {
+            const coorIndex = coordinate - 1;
+            targetCoors[coorIndex] = {
+              ...targetCoors[coorIndex],
+              isSelected: true,
+            };
+          }
+        }
+
+        const userTreasures = defaultTreasures.map((treasure) => ({
+          ...treasure,
+        }));
+        const opponentTreasures = defaultTreasures.map((treasure) => ({
+          ...treasure,
+        }));
+        let userPoint = 0;
+        let opponentPoint = 0;
+
+        updatedUserCoors.forEach((coor) => {
+          if (coor.isSelected && coor.typeOfTreasure !== null) {
+            const index = coor.typeOfTreasure - 1;
+            userTreasures[index].quantity -= 1;
+            opponentPoint += userTreasures[index].point;
+          }
+        });
+
+        updatedOpponentCoors.forEach((coor) => {
+          if (coor.isSelected && coor.typeOfTreasure !== null) {
+            const index = coor.typeOfTreasure - 1;
+            opponentTreasures[index].quantity -= 1;
+            userPoint += opponentTreasures[index].point;
+          }
+        });
+
+        setTreasures(userTreasures);
+        setOpponentTreasures(opponentTreasures);
+        setUserPoint(userPoint);
+        setOpponentPoint(opponentPoint);
+        setCoors(updatedUserCoors);
+        setOpponentCoors(updatedOpponentCoors);
+      } else {
+        const updatedUserCoors = defaultCoordinates.map((coor) => {
+          for (const [treasureType, treasureCoordinates] of Object.entries(
+            userMap
+          )) {
+            if (treasureCoordinates.includes(coor.coordinate)) {
+              return {
+                ...coor,
+                typeOfTreasure: parseInt(treasureType),
+                isSelected: false,
+              };
+            }
+          }
+          return coor;
+        });
+
+        setCoors(updatedUserCoors);
+      }
+    } catch (err) {
+      enqueueSnackbar(err.message, { variant: "error" });
+    }
+    setIsLoading(false);
+  };
+
   const handleChooseCoordinate = async (coordinate) => {
     setIsLoading(true);
     try {
@@ -56,117 +169,74 @@ const Game = () => {
     setIsLoading(false);
   };
 
-  const loadSteps = async () => {
+  const setTimes = async () => {
+    setIsLoading(true);
     try {
-      const userCoorsMap = user.id === joiner?.id ? joiner?.map : host?.map;
-      const opponentCoorsMap = user.id === host?.id ? joiner?.map : host?.map;
+      const currentTime = parseInt(Math.floor(Date.now()) / 1000);
+      const timeElapsedTurn = parseInt(
+        currentTime - game.countdownTimeTurn.start?.seconds
+      );
+      const remainingTimeTurn = parseInt(
+        game.countdownTimeTurn?.seconds - timeElapsedTurn
+      );
 
-      const userCoorsLoaded = coors.map((coor) => {
-        for (let key in userCoorsMap) {
-          if (
-            userCoorsMap.hasOwnProperty(key) &&
-            userCoorsMap[key].includes(coor.coordinate)
-          ) {
-            return { ...coor, typeOfTreasure: parseInt(key) };
-          }
-        }
-        return coor;
-      });
+      const timeElapsedGame = parseInt(
+        currentTime - game.countdownTimeGame.start?.seconds
+      );
+      const remainingTimeGame = parseInt(
+        game.countdownTimeGame?.seconds - timeElapsedGame
+      );
 
-      setCoors(userCoorsLoaded);
+      if (remainingTimeTurn < 0)
+        if (game.turn !== user?.id) await setTurn(user.id);
+        else setTurn(opponent.id);
 
-      if (game.steps) {
-        for (const step of game.steps) {
-          const newMapLoaded =
-            user.id === step.userId
-              ? opponentCoors.map((coor) => {
-                  for (const key in opponentCoorsMap)
-                    if (
-                      step.coordinates.includes(coor.coordinate) &&
-                      opponentCoorsMap[key].includes(coor.coordinate)
-                    )
-                      return {
-                        ...coor,
-                        typeOfTreasure: parseInt(key),
-                        isSelected: true,
-                      };
-
-                  if (step.coordinates.includes(coor.coordinate))
-                    return {
-                      ...coor,
-                      isSelected: true,
-                    };
-                  return coor;
-                })
-              : userCoorsLoaded.map((coor) => {
-                  for (const key in userCoorsMap)
-                    if (
-                      step.coordinates.includes(coor.coordinate) &&
-                      userCoorsMap[key].includes(coor.coordinate)
-                    )
-                      return {
-                        ...coor,
-                        typeOfTreasure: parseInt(key),
-                        isSelected: true,
-                      };
-
-                  if (step.coordinates.includes(coor.coordinate))
-                    return {
-                      ...coor,
-                      isSelected: true,
-                    };
-                  return coor;
-                });
-
-          let point = 0;
-          if (step.userId === user.id) {
-            const newTreasures = defaultTreasures.map((treasure) => {
-              let newQuantity = treasure.quantity;
-
-              newMapLoaded.forEach((coor) => {
-                if (coor.typeOfTreasure === treasure.type) {
-                  newQuantity = newQuantity - 1;
-                  point += treasure.point;
-                }
-              });
-
-              return { ...treasure, quantity: newQuantity };
-            });
-
-            setUserPoint(point);
-            setOpponentTreasures(newTreasures);
-            setOpponentCoors(newMapLoaded);
-            console.log({ opp: newMapLoaded });
-          } else {
-            const newTreasures = defaultTreasures.map((treasure) => {
-              let newQuantity = treasure.quantity;
-
-              newMapLoaded.forEach((coor) => {
-                if (coor.typeOfTreasure === treasure.type && coor.isSelected) {
-                  newQuantity = newQuantity - 1;
-                  point += treasure.point;
-                }
-              });
-
-              return { ...treasure, quantity: newQuantity };
-            });
-
-            setOpponentPoint(point);
-            setTreasures(newTreasures);
-            setCoors(newMapLoaded);
-            console.log({ user: newMapLoaded });
-          }
-        }
+      if (remainingTimeGame < 0) {
+        if (userPoint > opponentPoint)
+          await setWinnerGame(user, opponent, game);
+        else if (userPoint < opponentPoint)
+          await setWinnerGame(opponent, user, game);
+        else await setDrawGame(user, opponent, game);
+      } else {
+        setTurnTime(remainingTimeTurn >= 0 ? remainingTimeTurn : 0);
+        setGameTime(remainingTimeGame >= 0 ? remainingTimeGame : 0);
       }
     } catch (err) {
       enqueueSnackbar(err.message, { variant: "error" });
     }
+    setIsLoading(false);
   };
 
-  const handleCurrentPlayerWin = async () => {
+  const checkWinner = async () => {
     setIsLoading(true);
     try {
-      await setCurrentWin(user, game);
+      if (game.host.missingTurnCount >= 2) {
+        const winner = user?.id === host.id ? opponent : user;
+        const loser = user?.id === host.id ? user : opponent;
+
+        await setWinnerGame(winner, loser, game);
+      }
+
+      if (game.joiner.missingTurnCount >= 2) {
+        const winner = user?.id === joiner.id ? opponent : user;
+        const loser = user?.id === joiner.id ? user : opponent;
+
+        await setWinnerGame(winner, loser, game);
+      }
+
+      if (opponentTreasures.every((treasure) => treasure.quantity === 0)) {
+        await setWinnerGame(user, opponent, game);
+      }
+    } catch (err) {
+      enqueueSnackbar(err.message, { variant: "error" });
+    }
+    setIsLoading(false);
+  };
+
+  const setTurn = async (userId) => {
+    setIsLoading(true);
+    try {
+      await setUserTurn(userId, game);
     } catch (err) {
       enqueueSnackbar(err.message, { variant: "error" });
     }
@@ -174,22 +244,22 @@ const Game = () => {
   };
 
   useEffect(() => {
-    // loadUserCoors();
     loadSteps();
-  }, []);
+    setTimes();
+    checkWinner();
+  }, [game]);
 
-  // useEffect(() => {
-  //   loadSteps();
-  // }, [game]);
+  const loadOpponentData = async () => {
+    try {
+      await setOpponentData();
+    } catch (err) {
+      enqueueSnackbar(err.message, { variant: "error" });
+    }
+  };
 
   useEffect(() => {
-    if (
-      !opponentTreasures[1].quantity &&
-      !opponentTreasures[2].quantity &&
-      !opponentTreasures[3].quantity
-    )
-      handleCurrentPlayerWin();
-  }, [opponentTreasures]);
+    loadOpponentData();
+  }, []);
 
   return (
     <LayoutGame>
@@ -208,9 +278,7 @@ const Game = () => {
             >
               {user.username}
             </StyledTypo>
-            <StyledTypo color="red" fontSize={{ xs: 20, md: 24 }}>
-              0:30
-            </StyledTypo>
+
             <StyledTypo
               color={user.id !== game?.turn ? "#FFA751" : "#2E2E2E"}
               fontSize={{ xs: 20, md: 24 }}
@@ -218,16 +286,62 @@ const Game = () => {
               {host.id === user.id ? joiner.username : host.username}
             </StyledTypo>
           </Box>
+
+          <Box display="flex" justifyContent="center" gap="20px">
+            <Box alignItems="center">
+              <StyledTypo color="#2E2E2E" fontSize={{ xs: 20, md: 24 }}>
+                Game time:
+              </StyledTypo>
+            </Box>
+            <Box display="flex" gap="10px" alignItems="center">
+              <StyledTypo color="#2E2E2E" fontSize={{ xs: 20, md: 24 }}>
+                {parseInt(gameTime / 60)}
+              </StyledTypo>
+              <StyledTypo color="#2E2E2E" fontSize={{ xs: 20, md: 24 }}>
+                :
+              </StyledTypo>
+              <StyledTypo color="#2E2E2E" fontSize={{ xs: 20, md: 24 }}>
+                {parseInt(gameTime % 60)}
+              </StyledTypo>
+            </Box>
+          </Box>
+
           <Box display="flex" justifyContent="center" gap="10px">
-            <StyledTypo color="#2E2E2E" fontSize={{ xs: 20, md: 24 }}>
-              {userPoint}
-            </StyledTypo>
-            <StyledTypo color="#2E2E2E" fontSize={{ xs: 20, md: 24 }}>
-              :
-            </StyledTypo>
-            <StyledTypo color="#2E2E2E" fontSize={{ xs: 20, md: 24 }}>
-              {opponentPoint}
-            </StyledTypo>
+            <Box display="flex" alignItems="center">
+              <StyledTypo color="#2E2E2E" fontSize={{ xs: 20, md: 24 }}>
+                Turn time:
+              </StyledTypo>
+            </Box>
+            <Box display="flex" alignItems="center" gap="10px">
+              <StyledTypo color="#2E2E2E" fontSize={{ xs: 20, md: 24 }}>
+                {parseInt(turnTime / 60)}
+              </StyledTypo>
+              <StyledTypo color="#2E2E2E" fontSize={{ xs: 20, md: 24 }}>
+                :
+              </StyledTypo>
+              <StyledTypo color="#2E2E2E" fontSize={{ xs: 20, md: 24 }}>
+                {parseInt(turnTime % 60)}
+              </StyledTypo>
+            </Box>
+          </Box>
+
+          <Box display="flex" justifyContent="center" gap="20px">
+            <Box display="flex" alignItems="center">
+              <StyledTypo color="#2E2E2E" fontSize={{ xs: 20, md: 24 }}>
+                Points:
+              </StyledTypo>
+            </Box>
+            <Box display="flex" alignItems="center" gap="10px">
+              <StyledTypo color="#2E2E2E" fontSize={{ xs: 20, md: 24 }}>
+                {userPoint}
+              </StyledTypo>
+              <StyledTypo color="#2E2E2E" fontSize={{ xs: 20, md: 24 }}>
+                :
+              </StyledTypo>
+              <StyledTypo color="#2E2E2E" fontSize={{ xs: 20, md: 24 }}>
+                {opponentPoint}
+              </StyledTypo>
+            </Box>
           </Box>
         </Box>
 
@@ -354,9 +468,12 @@ const Game = () => {
                       coor.coordinate <= 10 ? "none" : "1px solid #fff",
                     "&:hover": { background: "rgba(255, 253, 253, 1)" },
                   }}
-                  onClick={() => handleChooseCoordinate(coor.coordinate)}
+                  onClick={() =>
+                    user.id === game.turn &&
+                    handleChooseCoordinate(coor.coordinate)
+                  }
                 >
-                  {coor.typeOfTreasure && (
+                  {coor.typeOfTreasure && coor.isSelected && (
                     <Box
                       component="img"
                       position="absolute"
@@ -393,7 +510,6 @@ const Game = () => {
                     cursor: "pointer",
                     "&:hover": { background: "rgba(255, 253, 253, 1)" },
                   }}
-                  // onClick={() => handleChooseTreasure(treasure.type)}
                 >
                   <Box
                     component="img"
