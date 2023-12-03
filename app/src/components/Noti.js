@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Box, Button, Typography, alpha, styled } from "@mui/material";
 
 import { notis } from "../utils/constants";
