@@ -217,7 +217,7 @@ const Game = () => {
         await setWinnerGame(winner, loser, game);
       }
 
-      if (game.joiner.missingTurnCount >= 2) {
+      if (game.joiner.missingTurnCount >= 3) {
         const winner = user?.id === joiner.id ? opponent : user;
         const loser = user?.id === joiner.id ? user : opponent;
 
@@ -273,15 +273,18 @@ const Game = () => {
         <Box display="flex" flexDirection="column">
           <Box display="flex" justifyContent="space-between">
             <StyledTypo
-              color={user.id === game?.turn ? "#FFA751" : "#2E2E2E"}
+              pr={3}
+              color={user.id === game?.turn ? "#fa9a3d" : "#2E2E2E"}
               fontSize={{ xs: 20, md: 24 }}
             >
               {user.username}
             </StyledTypo>
 
             <StyledTypo
-              color={user.id !== game?.turn ? "#FFA751" : "#2E2E2E"}
+              pl={3}
+              color={user.id !== game?.turn ? "#fa9a3d" : "#2E2E2E"}
               fontSize={{ xs: 20, md: 24 }}
+              textAlign="right"
             >
               {host.id === user.id ? joiner.username : host.username}
             </StyledTypo>
@@ -352,6 +355,7 @@ const Game = () => {
               lg: "flex",
             }}
             flexDirection="column"
+            alignItems="center"
             gap="20px"
           >
             <Grid
@@ -440,6 +444,7 @@ const Game = () => {
               lg: "flex",
             }}
             flexDirection="column"
+            alignItems="center"
             gap="20px"
           >
             <Grid

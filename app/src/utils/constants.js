@@ -10,14 +10,14 @@ export const defaultGameTime = 902;
 export const defaultTurnTime = 32;
 
 export const defaultTreasures = [
-  { type: 1, img: "/assets/images/firstTreasure.png", point: 10, quantity: 3 },
+  { type: 1, img: "/assets/images/firstTreasure.png", point: 10, quantity: 15 },
   {
     type: 2,
     img: "/assets/images/secondTreasure.png",
     point: 20,
-    quantity: 2,
+    quantity: 10,
   },
-  { type: 3, img: "/assets/images/thirdTreasure.png", point: 30, quantity: 1 },
+  { type: 3, img: "/assets/images/thirdTreasure.png", point: 30, quantity: 5 },
 ];
 
 export const defaultCoordinates = Array.from(

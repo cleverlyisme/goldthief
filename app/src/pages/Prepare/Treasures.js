@@ -208,7 +208,7 @@ const Treasures = () => {
                   src={treasure.img}
                   alt="Avatar"
                 />
-                <StyledTypo>{treasure.point}</StyledTypo>
+                <StyledTypo>{treasure.quantity}</StyledTypo>
               </Box>
             ))}
           </Box>
