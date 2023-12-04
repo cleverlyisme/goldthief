@@ -13,6 +13,8 @@ jobs:
           cd app
           yarn
           yarn build
-      - run: yarn global add firebase-tools
-      - run: |
-          firebase deploy
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_GOLDTHIEF_5AB2A }}"
+          projectId: goldthief-5ab2a
