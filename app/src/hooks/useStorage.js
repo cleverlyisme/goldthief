@@ -5,15 +5,9 @@ import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import useAuth from "./useAuth";
 
 const useStorage = () => {
-  const { user } = useAuth();
-
   const [file, setFile] = useState(null);
   const [percent, setPercent] = useState(0);
   const [urlImage, setUrlImage] = useState("");
-
-  useEffect(() => {
-    if (user) setUrlImage(user.avatar);
-  }, [user]);
 
   const handleChange = async (event) => {
     setFile(event.target.files[0]);

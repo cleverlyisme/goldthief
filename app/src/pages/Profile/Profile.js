@@ -93,9 +93,9 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    setUsername(user.username);
     setUrlImage(user.avatar);
-  }, [user]);
+    setUsername(user.username);
+  }, []);
 
   return (
     <LayoutGame>
