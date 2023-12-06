@@ -3,9 +3,9 @@ import { customAlphabet } from "nanoid";
 
 export const nanoid = customAlphabet("1234567890abcdefghijklmnopqrstuvwxyz", 4);
 
-export const defaultPrepareMapTime = 62;
+export const defaultPrepareMapTime = 182;
 
-export const defaultGameTime = 902;
+export const defaultGameTime = 1202;
 
 export const defaultTurnTime = 32;
 

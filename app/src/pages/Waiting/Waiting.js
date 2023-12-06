@@ -37,7 +37,7 @@ const Waiting = () => {
         </Box>
         <Box maxWidth="30vw" flexGrow={1}>
           <StyledTypo textAlign="right" fontSize={{ xs: 20, md: 24 }}>
-            Waiting For Opponent...
+            Waiting For Your Opponent...
           </StyledTypo>
         </Box>
         <Box width="100vw" display="flex" justifyContent="center">

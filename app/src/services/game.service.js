@@ -23,7 +23,7 @@ export const create = async (user, password) => {
   if (user?.activeGameId) throw new Error("User already in a game");
 
   const newGame = {
-    code: nanoid(),
+    code: nanoid().toLowerCase(),
     password: password.trim() || "",
     status: "waiting",
     host: {
@@ -37,6 +37,8 @@ export const create = async (user, password) => {
   const gameRef = await addDoc(collection(firestore, "games"), newGame);
   const gameSnap = await getDoc(doc(firestore, "games", gameRef.id));
   const game = { id: gameRef.id, ...gameSnap.data() };
+
+  console.log({ codeHost: game.code });
 
   await updateDoc(doc(firestore, "users", id), {
     activeGameId: game.id,
@@ -52,9 +54,11 @@ export const join = async (user, code, password) => {
 
   if (!code.trim()) throw new Error("Invalid room code");
 
+  console.log({ code: code.toLowerCase() });
+
   const gameQuery = query(
     collection(firestore, "games"),
-    where("code", "==", code)
+    where("code", "==", code.toLowerCase())
   );
   const gameSnaps = await getDocs(gameQuery);
 

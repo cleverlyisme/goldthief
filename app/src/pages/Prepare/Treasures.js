@@ -166,7 +166,7 @@ const Treasures = () => {
         </Box>
         <Box display="flex" justifyContent="center" alignItems="center">
           <StyledTypo color="red" fontSize={{ xs: 16, md: 22 }}>
-            Time: {time}
+            Time: {parseInt(time / 60)} : {parseInt(time % 60)}
           </StyledTypo>
         </Box>
         <Box
@@ -215,7 +215,7 @@ const Treasures = () => {
           <Box>
             <Grid
               container
-              height={{ xs: "55vh", sm: "65vh" }}
+              height={{ xs: "45vh", sm: "65vh" }}
               width={{ xs: "80vw", sm: "60vw", md: "50vw", lg: "35vw" }}
               bgcolor="rgba(255, 253, 253, 0.6)"
               borderRadius="10px"

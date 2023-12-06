@@ -348,7 +348,11 @@ const Game = () => {
           </Box>
         </Box>
 
-        <Box display="flex" gap="20px">
+        <Box
+          display="flex"
+          gap="20px"
+          justifyContent={{ xs: "center", lg: "space-between" }}
+        >
           <Box
             display={{
               xs: user.id !== game?.turn ? "flex" : "none",
@@ -360,8 +364,8 @@ const Game = () => {
           >
             <Grid
               container
-              height={{ xs: "55vh", sm: "65vh" }}
-              width={{ xs: "80vw", sm: "60vw", md: "50vw", lg: "35vw" }}
+              height={{ xs: "45vh", sm: "65vh" }}
+              width={{ xs: "80vw", sm: "70vw", md: "60vw", lg: "35vw" }}
               bgcolor="rgba(255, 253, 253, 0.6)"
               borderRadius="10px"
               overflow="hidden"
@@ -449,8 +453,8 @@ const Game = () => {
           >
             <Grid
               container
-              height={{ xs: "55vh", sm: "65vh" }}
-              width={{ xs: "80vw", sm: "60vw", md: "50vw", lg: "35vw" }}
+              height={{ xs: "45vh", sm: "65vh" }}
+              width={{ xs: "80vw", sm: "70vw", md: "60vw", lg: "35vw" }}
               bgcolor="rgba(255, 253, 253, 0.6)"
               borderRadius="10px"
               overflow="hidden"
