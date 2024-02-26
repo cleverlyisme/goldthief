@@ -84,7 +84,7 @@ const Guide = () => {
             src="assets/images/firstTreasure.png"
           />
           <StyledTypo fontSize={{ xs: 18, md: 22 }}>
-            Points: 10, Quantity: 15
+            Points: 10, Quantity: 4
           </StyledTypo>
         </StyledBox>
         <StyledBox>
@@ -96,7 +96,7 @@ const Guide = () => {
             src="assets/images/secondTreasure.png"
           />
           <StyledTypo fontSize={{ xs: 18, md: 22 }}>
-            Points: 20, Quantity: 10
+            Points: 20, Quantity: 3
           </StyledTypo>
         </StyledBox>
         <StyledBox>
@@ -108,7 +108,7 @@ const Guide = () => {
             src="assets/images/thirdTreasure.png"
           />
           <StyledTypo fontSize={{ xs: 18, md: 22 }}>
-            Points: 30, Quantity: 5
+            Points: 30, Quantity: 2
           </StyledTypo>
         </StyledBox>
         <StyledTypo fontSize={{ xs: 18, md: 22 }}>
