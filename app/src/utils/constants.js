@@ -5,7 +5,7 @@ export const nanoid = customAlphabet("1234567890abcdefghijklmnopqrstuvwxyz", 4);
 
 export const defaultPrepareMapTime = 182;
 
-export const defaultGameTime = 1202;
+export const defaultGameTime = 602;
 
 export const defaultTurnTime = 32;
 
